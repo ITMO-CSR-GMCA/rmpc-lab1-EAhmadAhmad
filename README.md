@@ -1,21 +1,252 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/L0glmnMn)
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=23545385&assignment_repo_type=AssignmentRepo)
-# RMPC-lab1
+# Robot Motion Planning and Control — Lab 1
 
-First laboratory work for course Robot Motion Planning and Control.
+**UR5 Manipulator: Kinematics, Trajectory Planning, and Inverse Dynamics (Newton–Euler)**
 
-Assignment
+---
 
-1. For the selected robot option, load the manipulator model from the toolbox **different then Puma560** and output the Denavit-Hartenberg parameters.
-2. Specify the masses of the links, the positions of their centers of mass, the tensors of inertia, the moments of inertia of the drives, the coefficients of viscous friction of the drives, the coefficients of Coulomb friction of the drives, the gear ratios of the reducers and the constraints on the generalized coordinates. It is recommended to refer to the data sheets of the manipulators used.
-3. Specify and display arbitrary initial and final configurations of the robot.
-4. Plan a trajectory between the specified configurations.
-5. Solve the inverse dynamics problem using the Newton-Euler method for the following scenarios: <br>
-+ non-zero velocities and accelerations $\dot{q} \neq 0, \ddot{q} \neq 0$;
-+ non-zero velocities and negligible accelerations $\dot{q} \neq 0, \ddot{q} \approx 0$ - quasi-statics;
-+ zero velocities and accelerations $\dot{q} = 0, \ddot{q} = 0$ - maintaining a given position;
-6. Determine the numerical values ​​of the elements of the matrices $M(q), C(q, \dot{q}), G(q)$ at each calculated moment of time.
-7. Plot graphs of the moments of the manipulator links along the trajectory for each scenario (see point #5).
-8. Create a report in .ipynb format, with detailed comments.
-9. All steps and conclusions are formulated based on the results of the work in README.md
-  
+## 1. Objective
+
+This laboratory work implements a complete pipeline for robotic manipulator analysis:
+
+* Extract kinematic parameters (Denavit–Hartenberg)
+* Define dynamic parameters
+* Plan a smooth trajectory between two configurations
+* Solve inverse dynamics using the Newton–Euler formulation
+* Compute and analyze dynamic matrices ( M(q), C(q,\dot{q}), G(q) )
+
+---
+
+## 2. Robot Model
+
+The selected robot is the **UR5 6-DOF industrial manipulator**.
+
+The model is loaded from the Robotics Toolbox:
+
+```python
+robot = rtb.models.DH.UR5()
+```
+
+This provides a structured representation of the robot’s kinematics and baseline dynamics.
+
+---
+
+## 3. Kinematic Model (DH Parameters)
+
+The Denavit–Hartenberg (DH) convention is used to describe the robot geometry.
+
+
+| Joint | θ (rad) | d (m)    | a (m)    | α (rad) |
+| ----- | ------- | -------- | -------- | ------- |
+| 1     | θ₁      | 0.089159 | 0        | +π/2    |
+| 2     | θ₂      | 0        | -0.425   | 0       |
+| 3     | θ₃      | 0        | -0.39225 | 0       |
+| 4     | θ₄      | 0.10915  | 0        | +π/2    |
+| 5     | θ₅      | 0.09465  | 0        | -π/2    |
+| 6     | θ₆      | 0.0823   | 0        | 0       |
+
+**Notes:**
+
+* θᵢ are the joint variables (revolute joints)
+* Units are in meters and radians
+* Parameters correspond to the standard DH convention used in the Robotics Toolbox
+
+
+These parameters define the forward kinematics chain.
+
+---
+
+## 4. Dynamic Model
+
+Each link is assigned the following parameters:
+
+* Link mass ( m_i )
+* Center of mass ( r_i )
+* Inertia tensor ( I_i )
+* Motor inertia ( J_{m,i} )
+* Viscous friction ( B_i )
+* Coulomb friction ( T_{c,i} )
+* Gear ratio ( G_i )
+* Joint limits ( q_{lim,i} )
+
+---
+
+## 5. Assumptions and Parameter Justification
+
+The manufacturer does **not provide complete actuator-level dynamics** (motor inertia, friction, gearbox details).
+
+Therefore, a hybrid modeling approach is used:
+
+### 5.1 Parameters from structured models
+
+* Mass, COM, inertia tensors extracted from URDF / toolbox models
+
+### 5.2 Estimated parameters
+
+The following are approximated based on robotics literature:
+
+* **Gear ratio**:
+  ( G \approx 80–120 ) (harmonic drive typical range)
+
+* **Viscous friction**:
+  Small values to model damping
+
+* **Coulomb friction**:
+  Low asymmetric values to capture stiction effects
+
+* **Motor inertia**:
+  Assumed small relative to link inertia
+
+These assumptions are standard practice in simulation when exact data is unavailable.
+
+---
+
+## 6. Configurations
+
+Two configurations are defined:
+
+* Initial configuration: ( q_{start} )
+* Final configuration: ( q_{end} )
+
+These represent valid joint-space positions within limits.
+
+---
+
+## 7. Trajectory Planning
+
+A smooth joint-space trajectory is generated:
+
+```python
+tr = rtb.jtraj(q_start, q_end, n_steps)
+```
+
+This yields:
+
+* Position ( q(t) )
+* Velocity ( \dot{q}(t) )
+* Acceleration ( \ddot{q}(t) )
+
+ensuring dynamic consistency.
+
+---
+
+## 8. Inverse Dynamics (Newton–Euler Formulation)
+
+The joint torques are computed using:
+
+[
+\tau = M(q)\ddot{q} + C(q,\dot{q})\dot{q} + G(q)
+]
+
+Three motion regimes are analyzed:
+
+### 8.1 Full dynamics
+
+[
+\dot{q} \neq 0,\quad \ddot{q} \neq 0
+]
+
+### 8.2 Quasi-static
+
+[
+\dot{q} \neq 0,\quad \ddot{q} \approx 0
+]
+
+### 8.3 Static equilibrium
+
+[
+\dot{q} = 0,\quad \ddot{q} = 0
+]
+
+---
+
+## 9. Dynamic Matrices Evaluation
+
+At each time step, the following are computed:
+
+* Inertia matrix ( M(q) )
+* Coriolis matrix ( C(q,\dot{q}) )
+* Gravity vector ( G(q) )
+
+These characterize the robot’s dynamic response.
+
+---
+
+## 10. Results
+
+The following outputs are generated:
+
+* Joint torque profiles ( \tau(t) )
+* Evolution of dynamic matrices
+* Comparative analysis across motion regimes
+
+### Observations
+
+* Full dynamics produces **maximum torque demand**
+* Quasi-static reduces torque due to negligible acceleration
+* Static case corresponds to **pure gravity compensation**
+
+---
+
+## 11. Discussion
+
+The results highlight:
+
+* Strong dependence of torque on acceleration terms
+* Dominance of gravity in low-motion regimes
+* Sensitivity to assumed friction and gearbox parameters
+
+Despite approximations, the model preserves realistic physical behavior.
+
+---
+
+## 12. Conclusion
+
+This work demonstrates a full robotic dynamics pipeline:
+
+* Kinematic modeling
+* Trajectory generation
+* Dynamic analysis
+
+A physically consistent model is achieved despite incomplete manufacturer data by using justified engineering assumptions.
+
+The Newton–Euler method proves effective for real-time torque computation.
+
+---
+
+## 13. How to Run
+
+Install dependencies:
+
+```bash
+pip install roboticstoolbox-python numpy matplotlib
+```
+
+Run the notebook:
+
+```bash
+jupyter notebook Lab1.ipynb
+```
+
+---
+
+## 14. Project Structure
+
+```
+Robot-Motion-Planning-Lab1/
+│
+├── Lab1.ipynb
+├── README.md
+├── requirements.txt
+└── images/
+```
+
+---
+
+## 15. References
+
+* P. Corke, *Robotics, Vision and Control*
+* Robotics Toolbox for Python
+* UR5 industrial robot documentation
+* ROS URDF models
+
+---
