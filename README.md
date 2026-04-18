@@ -236,15 +236,13 @@ Robot-Motion-Planning-Lab1/
 │
 ├── Lab1.ipynb
 ├── README.md
-├── requirements.txt
-└── images/
 ```
 
 ---
 
 ## 15. References
 
-* P. Corke, *Robotics, Vision and Control*
+
 * Robotics Toolbox for Python
 * UR5 industrial robot documentation
 * ROS URDF models
