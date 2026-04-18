@@ -12,7 +12,7 @@ This laboratory work implements a complete pipeline for robotic manipulator anal
 * Define dynamic parameters
 * Plan a smooth trajectory between two configurations
 * Solve inverse dynamics using the Newton–Euler formulation
-* Compute and analyze dynamic matrices ( M(q), C(q,\dot{q}), G(q) )
+* Compute and analyze dynamic matrices ( $M(q)$, $C(q,\dot{q})$,$G(q)$ )
 
 ---
 
@@ -85,7 +85,7 @@ Therefore, a hybrid modeling approach is used:
 The following are approximated based on robotics literature:
 
 * **Gear ratio**:
-  ( G \approx 80–120 ) (harmonic drive typical range)
+  ( $G \approx 80–120$ ) (harmonic drive typical range)
 
 * **Viscous friction**:
   Small values to model damping
@@ -104,8 +104,8 @@ These assumptions are standard practice in simulation when exact data is unavail
 
 Two configurations are defined:
 
-* Initial configuration: ( q_{start} )
-* Final configuration: ( q_{end} )
+* Initial configuration: ( $q_{start}$ )
+* Final configuration: ( $q_{end}$ )
 
 These represent valid joint-space positions within limits.
 
@@ -121,9 +121,9 @@ tr = rtb.jtraj(q_start, q_end, n_steps)
 
 This yields:
 
-* Position ( q(t) )
-* Velocity ( \dot{q}(t) )
-* Acceleration ( \ddot{q}(t) )
+* Position ( $q(t)$ )
+* Velocity ( $\dot{q}$(t) )
+* Acceleration ( $\ddot{q}$(t) )
 
 ensuring dynamic consistency.
 
@@ -133,29 +133,29 @@ ensuring dynamic consistency.
 
 The joint torques are computed using:
 
-[
-\tau = M(q)\ddot{q} + C(q,\dot{q})\dot{q} + G(q)
-]
+
+$\tau = M(q)\ddot{q} + C(q,\dot{q})\dot{q} + G(q)$
+
 
 Three motion regimes are analyzed:
 
 ### 8.1 Full dynamics
 
-[
-\dot{q} \neq 0,\quad \ddot{q} \neq 0
-]
+
+$\dot{q} \neq 0,\quad \ddot{q} \neq 0$
+
 
 ### 8.2 Quasi-static
 
-[
-\dot{q} \neq 0,\quad \ddot{q} \approx 0
-]
+
+$\dot{q} \neq 0,\quad \ddot{q} \approx 0$
+
 
 ### 8.3 Static equilibrium
 
-[
-\dot{q} = 0,\quad \ddot{q} = 0
-]
+
+$\dot{q} = 0,\quad \ddot{q} = 0$
+
 
 ---
 
@@ -163,9 +163,9 @@ Three motion regimes are analyzed:
 
 At each time step, the following are computed:
 
-* Inertia matrix ( M(q) )
-* Coriolis matrix ( C(q,\dot{q}) )
-* Gravity vector ( G(q) )
+* Inertia matrix ( $M(q)$ )
+* Coriolis matrix ( $C(q,\dot{q})$ )
+* Gravity vector ( $G(q)$ )
 
 These characterize the robot’s dynamic response.
 
@@ -175,7 +175,7 @@ These characterize the robot’s dynamic response.
 
 The following outputs are generated:
 
-* Joint torque profiles ( \tau(t) )
+* Joint torque profiles ( $\tau$(t) )
 * Evolution of dynamic matrices
 * Comparative analysis across motion regimes
 
