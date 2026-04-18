@@ -171,13 +171,6 @@ These characterize the robot’s dynamic response.
 
 ---
 
-## 10. Results
-
-The following outputs are generated:
-
-* Joint torque profiles ( $\tau$(t) )
-* Evolution of dynamic matrices
-* Comparative analysis across motion regimes
 
 ### Observations
 
